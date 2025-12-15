@@ -7,6 +7,7 @@ const connectDB = require('./utils/database');
 // Importar rutas
 const authRoutes = require('./routes/auth.routes');
 const taskRoutes = require('./routes/task.routes');
+const tweetRoutes = require('./routes/tweet');
 
 // Conectar a la base de datos
 connectDB();
@@ -51,6 +52,7 @@ app.get('/', (req, res) => {
 // Rutas de la API
 app.use('/api', authRoutes);
 app.use('/api', taskRoutes);
+app.use('/api/tweets', tweetRoutes);
 
 // Middleware para manejar errores 404
 app.use('*', (req, res) => {
