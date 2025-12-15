@@ -6,11 +6,14 @@ const connectDB = require('./utils/database');
 
 // Importar rutas
 const authRoutes = require('./routes/auth.routes');
-const taskRoutes = require('./routes/task.routes');
 const tweetRoutes = require('./routes/tweet');
 
 // Conectar a la base de datos
 connectDB();
+
+// Importar modelos para que Mongoose los registre
+require('./models/User');
+require('./models/Tweet');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,7 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
   res.json({
     ok: true,
-    message: 'API de Mi Todo App - Funcionando correctamente',
+    message: 'API de Twitter Clone - Funcionando correctamente',
     version: '1.0.0',
     endpoints: {
       auth: {
@@ -39,11 +42,11 @@ app.get('/', (req, res) => {
         registro: 'POST /api/registro',
         perfil: 'GET /api/perfil (requiere token)'
       },
-      tasks: {
-        todas: 'GET /api/tasks (requiere token)',
-        crear: 'POST /api/tasks (requiere token)',
-        actualizar: 'PUT /api/tasks/:id (requiere token)',
-        eliminar: 'DELETE /api/tasks/:id (requiere token)'
+      tweets: {
+        obtener_todos: 'GET /api/tweets (requiere token)',
+        crear: 'POST /api/tweets (requiere token)',
+        like: 'POST /api/tweets/:id/like (requiere token)',
+        eliminar: 'DELETE /api/tweets/:id (requiere token)'
       }
     }
   });
@@ -51,7 +54,6 @@ app.get('/', (req, res) => {
 
 // Rutas de la API
 app.use('/api', authRoutes);
-app.use('/api', taskRoutes);
 app.use('/api/tweets', tweetRoutes);
 
 // Middleware para manejar errores 404
