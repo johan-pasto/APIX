@@ -4,25 +4,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const connectDB = require('./utils/database');
 
-app.get('/api/test-db', async (req, res) => {
-  const mongoose = require('mongoose');
-  try {
-    // Intenta una operación simple de MongoDB
-    const User = require('./models/User');
-    const count = await User.countDocuments();
-    res.json({ ok: true, message: '✅ DB Conectada', userCount: count });
-  } catch (error) {
-    console.error('❌ Error en test-db:', error.message);
-    res.status(500).json({ 
-      ok: false, 
-      message: '❌ Error DB', 
-      error: error.message,
-      hasMongoUri: !!process.env.MONGODB_URI
-    });
-  }
-});
-
-
 // Importar rutas
 const authRoutes = require('./routes/auth.routes');
 const tweetRoutes = require('./routes/tweet');
@@ -69,6 +50,25 @@ app.get('/', (req, res) => {
       }
     }
   });
+});
+
+// ✅ MOVER AQUÍ la ruta test-db (después de crear app)
+app.get('/api/test-db', async (req, res) => {
+  const mongoose = require('mongoose');
+  try {
+    // Intenta una operación simple de MongoDB
+    const User = require('./models/User');
+    const count = await User.countDocuments();
+    res.json({ ok: true, message: '✅ DB Conectada', userCount: count });
+  } catch (error) {
+    console.error('❌ Error en test-db:', error.message);
+    res.status(500).json({ 
+      ok: false, 
+      message: '❌ Error DB', 
+      error: error.message,
+      hasMongoUri: !!process.env.MONGODB_URI
+    });
+  }
 });
 
 // Rutas de la API
