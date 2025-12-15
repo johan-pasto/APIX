@@ -59,6 +59,21 @@ router.post('/login', validarLogin, async (req, res) => {
   }
 });
 
+router.post('/registro', validarRegistro, async (req, res) => {
+  // AÑADE ESTAS LÍNEAS:
+  console.log('🔵 [REGISTRO] Solicitud recibida en Vercel');
+  console.log('🔵 [REGISTRO] Body recibido:', req.body);
+  console.log('🔵 [REGISTRO] Valor de MONGODB_URI:', process.env.MONGODB_URI ? 'DEFINIDA' : 'NO DEFINIDA');
+
+  try {
+    const { nombre, usuario, email, password, telefono } = req.body;
+    // ... el resto de tu código original ...
+  } catch (error) {
+    console.error('🔴 [REGISTRO] Error completo:', error); // Agrega esto en el catch
+    // ... manejo del error ...
+  }
+});
+
 // POST /api/registro - Registrarse
 router.post('/registro', validarRegistro, async (req, res) => {
   try {
