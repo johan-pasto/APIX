@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const User = require('../models/User'); 
 /**
  * @route   GET /api/tweets/:id/comentarios
  * @desc    Obtener todos los comentarios de un tweet
