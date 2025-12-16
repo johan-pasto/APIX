@@ -93,9 +93,57 @@ const validarTarea = [
     next();
   }
 ];
+const validarComentario = [
+  body('contenido')
+    .trim()
+    .notEmpty().withMessage('El contenido del comentario es requerido')
+    .isLength({ max: 280 }).withMessage('El comentario no puede exceder 280 caracteres'),
+  
+  body('tweetId')
+    .notEmpty().withMessage('El ID del tweet es requerido')
+    .isMongoId().withMessage('ID de tweet inválido'),
+  
+  (req, res, next) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Error de validación',
+        errores: errores.array()
+      });
+    }
+    next();
+  }
+];
+
+const validarEdicionComentario = [
+  body('contenido')
+    .trim()
+    .notEmpty().withMessage('El contenido del comentario es requerido')
+    .isLength({ max: 280 }).withMessage('El comentario no puede exceder 280 caracteres'),
+  
+  body('comentarioId')
+    .notEmpty().withMessage('El ID del comentario es requerido')
+    .isMongoId().withMessage('ID de comentario inválido'),
+  
+  (req, res, next) => {
+    const errores = validationResult(req);
+    if (!errores.isEmpty()) {
+      return res.status(400).json({
+        ok: false,
+        message: 'Error de validación',
+        errores: errores.array()
+      });
+    }
+    next();
+  }
+];
+
 
 module.exports = {
   validarLogin,
   validarRegistro,
-  validarTarea
+  validarTarea,
+  validarComentario,
+  validarEdicionComentario
 };
