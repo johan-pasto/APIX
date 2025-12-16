@@ -1,5 +1,250 @@
+// src/routes/tweet.js
+const express = require('express');
 const mongoose = require('mongoose');
-const User = require('../models/User'); 
+const router = express.Router();
+
+// Middlewares
+const authMiddleware = require('../middleware/auth.middleware');
+const { 
+  validarComentario, 
+  validarEdicionComentario 
+} = require('../middleware/validate.middleware');
+
+// Models
+const Tweet = require('../models/Tweet');
+const User = require('../models/User');
+
+// ==================== RUTAS DE TWEETS ====================
+
+/**
+ * @route   GET /api/tweets
+ * @desc    Obtener todos los tweets
+ * @access  Public
+ */
+router.get('/', async (req, res) => {
+  try {
+    const tweets = await Tweet.find()
+      .populate('usuario', 'nombre usuario avatar')
+      .populate('comentarios.usuario', 'nombre usuario avatar')
+      .sort({ fecha: -1 });
+    
+    res.json({
+      ok: true,
+      tweets,
+      count: tweets.length
+    });
+  } catch (error) {
+    console.error('Error obteniendo tweets:', error);
+    res.status(500).json({
+      ok: false,
+      message: 'Error al obtener tweets'
+    });
+  }
+});
+
+/**
+ * @route   GET /api/tweets/:id
+ * @desc    Obtener un tweet por ID
+ * @access  Public
+ */
+router.get('/:id', async (req, res) => {
+  try {
+    const tweet = await Tweet.findById(req.params.id)
+      .populate('usuario', 'nombre usuario avatar')
+      .populate('comentarios.usuario', 'nombre usuario avatar');
+    
+    if (!tweet) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Tweet no encontrado'
+      });
+    }
+    
+    res.json({
+      ok: true,
+      tweet
+    });
+  } catch (error) {
+    console.error('Error obteniendo tweet:', error);
+    res.status(500).json({
+      ok: false,
+      message: 'Error al obtener tweet'
+    });
+  }
+});
+
+/**
+ * @route   POST /api/tweets
+ * @desc    Crear un nuevo tweet
+ * @access  Private
+ */
+router.post('/', authMiddleware, async (req, res) => {
+  try {
+    const { contenido, imagen } = req.body;
+    
+    const nuevoTweet = new Tweet({
+      usuario: req.user.id,
+      contenido,
+      imagen: imagen || null
+    });
+    
+    await nuevoTweet.save();
+    
+    // Populate para enviar respuesta
+    const tweetCreado = await Tweet.findById(nuevoTweet._id)
+      .populate('usuario', 'nombre usuario avatar');
+    
+    res.status(201).json({
+      ok: true,
+      message: 'Tweet creado exitosamente',
+      tweet: tweetCreado
+    });
+  } catch (error) {
+    console.error('Error creando tweet:', error);
+    res.status(500).json({
+      ok: false,
+      message: 'Error al crear tweet'
+    });
+  }
+});
+
+/**
+ * @route   PUT /api/tweets/:id
+ * @desc    Actualizar un tweet
+ * @access  Private (solo dueño del tweet)
+ */
+router.put('/:id', authMiddleware, async (req, res) => {
+  try {
+    const tweet = await Tweet.findById(req.params.id);
+    
+    if (!tweet) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Tweet no encontrado'
+      });
+    }
+    
+    // Verificar que el usuario sea el dueño del tweet
+    if (tweet.usuario.toString() !== req.user.id) {
+      return res.status(403).json({
+        ok: false,
+        message: 'No autorizado para editar este tweet'
+      });
+    }
+    
+    const { contenido, imagen } = req.body;
+    
+    tweet.contenido = contenido || tweet.contenido;
+    tweet.imagen = imagen !== undefined ? imagen : tweet.imagen;
+    tweet.editado = true;
+    tweet.updatedAt = new Date();
+    
+    await tweet.save();
+    
+    const tweetActualizado = await Tweet.findById(tweet._id)
+      .populate('usuario', 'nombre usuario avatar');
+    
+    res.json({
+      ok: true,
+      message: 'Tweet actualizado',
+      tweet: tweetActualizado
+    });
+  } catch (error) {
+    console.error('Error actualizando tweet:', error);
+    res.status(500).json({
+      ok: false,
+      message: 'Error al actualizar tweet'
+    });
+  }
+});
+
+/**
+ * @route   DELETE /api/tweets/:id
+ * @desc    Eliminar un tweet
+ * @access  Private (solo dueño del tweet o admin)
+ */
+router.delete('/:id', authMiddleware, async (req, res) => {
+  try {
+    const tweet = await Tweet.findById(req.params.id);
+    
+    if (!tweet) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Tweet no encontrado'
+      });
+    }
+    
+    // Verificar permisos
+    const isOwner = tweet.usuario.toString() === req.user.id;
+    const isAdmin = req.user.rol === 'admin'; // Asumiendo campo 'rol' en User
+    
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({
+        ok: false,
+        message: 'No autorizado para eliminar este tweet'
+      });
+    }
+    
+    await tweet.deleteOne();
+    
+    res.json({
+      ok: true,
+      message: 'Tweet eliminado exitosamente'
+    });
+  } catch (error) {
+    console.error('Error eliminando tweet:', error);
+    res.status(500).json({
+      ok: false,
+      message: 'Error al eliminar tweet'
+    });
+  }
+});
+
+/**
+ * @route   POST /api/tweets/:id/like
+ * @desc    Dar/quitar like a un tweet
+ * @access  Private
+ */
+router.post('/:id/like', authMiddleware, async (req, res) => {
+  try {
+    const tweet = await Tweet.findById(req.params.id);
+    
+    if (!tweet) {
+      return res.status(404).json({
+        ok: false,
+        message: 'Tweet no encontrado'
+      });
+    }
+    
+    const userId = req.user.id;
+    const likeIndex = tweet.likes.indexOf(userId);
+    
+    if (likeIndex === -1) {
+      // Dar like
+      tweet.likes.push(userId);
+    } else {
+      // Quitar like
+      tweet.likes.splice(likeIndex, 1);
+    }
+    
+    await tweet.save();
+    
+    res.json({
+      ok: true,
+      liked: likeIndex === -1, // true si acaba de dar like, false si quitó
+      likesCount: tweet.likes.length
+    });
+  } catch (error) {
+    console.error('Error dando like:', error);
+    res.status(500).json({
+      ok: false,
+      message: 'Error al dar like'
+    });
+  }
+});
+
+// ==================== RUTAS DE COMENTARIOS ====================
+
 /**
  * @route   GET /api/tweets/:id/comentarios
  * @desc    Obtener todos los comentarios de un tweet
@@ -279,3 +524,5 @@ router.post('/:tweetId/comentarios/:comentarioId/like', authMiddleware, async (r
     });
   }
 });
+
+module.exports = router;
