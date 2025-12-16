@@ -1,8 +1,8 @@
-import express from 'express';
-import Comment from '../models/Comment.js';
-import Tweet from '../models/Tweet.js';
-import { authMiddleware } from '../middleware/auth.middleware.js';
-import { validateComment } from '../middleware/validate.middleware.js';
+const express = require('express');
+const Comment = require('../models/Comment');
+const Tweet = require('../models/Tweet');
+const authMiddleware = require('../middleware/auth.middleware');
+const { validarComentario: validateComment } = require('../middleware/validate.middleware');
 
 const router = express.Router();
 
@@ -310,4 +310,4 @@ router.post('/:id/like', authMiddleware, async (req, res) => {
   }
 });
 
-export default router;
+module.exports = router;

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const CommentSchema = new mongoose.Schema({
   contenido: {
@@ -37,6 +37,10 @@ const CommentSchema = new mongoose.Schema({
   timestamps: true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true }
+}, {
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 // Virtual para contar likes
@@ -48,7 +52,7 @@ CommentSchema.virtual('likesCount').get(function() {
 CommentSchema.pre(/^find/, function(next) {
   this.populate({
     path: 'usuario',
-    select: 'username nombre avatar'
+    select: 'usuario nombre avatar'
   });
   next();
 });
@@ -59,4 +63,4 @@ CommentSchema.pre('remove', async function(next) {
   next();
 });
 
-export default mongoose.models.Comment || mongoose.model('Comment', CommentSchema);
+module.exports = mongoose.models.Comment || mongoose.model('Comment', CommentSchema);

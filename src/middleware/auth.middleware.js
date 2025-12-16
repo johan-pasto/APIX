@@ -30,7 +30,7 @@ const autenticar = async (req, res, next) => {
       });
     }
     
-    req.usuario = usuario;
+    req.user = usuario;
     next();
   } catch (error) {
     console.error('Error en autenticación:', error);
