@@ -40,6 +40,24 @@ const userSchema = new mongoose.Schema({
     enum: ['Usuario', 'Miembro', 'Premium'],
     default: 'Usuario'
   },
+  // AGREGAR ESTOS CAMPOS NUEVOS:
+  bio: {
+    type: String,
+    default: '',
+    maxlength: [160, 'La biografía no puede exceder 160 caracteres']
+  },
+  avatar_url: {
+    type: String,
+    default: ''
+  },
+  ubicacion: {
+    type: String,
+    default: ''
+  },
+  sitio_web: {
+    type: String,
+    default: ''
+  },
   creadoEn: {
     type: Date,
     default: Date.now
@@ -51,9 +69,9 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   }
-}, {
+}, {  // <-- ESTE PARÉNTESIS CIERRA EL PRIMER PARÁMETRO
   timestamps: true
-});
+});  // <-- AQUÍ SE CIERRA LA LLAMADA A mongoose.Schema()
 
 // Hash de la contraseña antes de guardar
 userSchema.pre('save', async function(next) {

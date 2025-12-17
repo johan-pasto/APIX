@@ -80,11 +80,11 @@ router.get('/:userId/tweets', async (req, res) => {
  * @desc    Actualizar perfil de usuario
  * @access  Private (solo el propio usuario)
  */
+
 router.put('/:userId', authMiddleware, async (req, res) => {
   try {
     const { userId } = req.params;
     
-    // Verificar que el usuario está actualizando su propio perfil
     if (userId !== req.user.id) {
       return res.status(403).json({
         ok: false,
@@ -92,15 +92,23 @@ router.put('/:userId', authMiddleware, async (req, res) => {
       });
     }
     
-    const { nombre, telefono, avatar } = req.body;
+    const { 
+      nombre, 
+      telefono, 
+      avatar_url, 
+      bio, 
+      ubicacion, 
+      sitio_web 
+    } = req.body;
     
-    // Campos permitidos para actualizar
     const updateData = {};
     if (nombre !== undefined) updateData.nombre = nombre;
     if (telefono !== undefined) updateData.telefono = telefono;
-    if (avatar !== undefined) updateData.avatar = avatar;
+    if (avatar_url !== undefined) updateData.avatar_url = avatar_url;
+    if (bio !== undefined) updateData.bio = bio;
+    if (ubicacion !== undefined) updateData.ubicacion = ubicacion;
+    if (sitio_web !== undefined) updateData.sitio_web = sitio_web;
     
-    // Actualizar usuario
     const usuarioActualizado = await User.findByIdAndUpdate(
       userId,
       updateData,
