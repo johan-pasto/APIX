@@ -35,28 +35,42 @@ const userSchema = new mongoose.Schema({
     default: '',
     match: [/^[0-9]{10}$|^$/, 'Teléfono inválido (10 dígitos)']
   },
-  membresia: {
+  avatar: {
     type: String,
-    enum: ['Usuario', 'Miembro', 'Premium'],
-    default: 'Usuario'
-  },
-  // AGREGAR ESTOS CAMPOS NUEVOS:
-  bio: {
-    type: String,
-    default: '',
-    maxlength: [160, 'La biografía no puede exceder 160 caracteres']
+    default: ''
   },
   avatar_url: {
     type: String,
     default: ''
   },
+  bio: {
+    type: String,
+    trim: true,
+    maxlength: [320, 'La biografía no puede exceder 320 caracteres'],
+    default: ''
+  },
   ubicacion: {
     type: String,
+    trim: true,
     default: ''
   },
   sitio_web: {
     type: String,
+    trim: true,
     default: ''
+  },
+  seguidores: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  siguiendo: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  membresia: {
+    type: String,
+    enum: ['Usuario', 'Miembro', 'Premium'],
+    default: 'Usuario'
   },
   creadoEn: {
     type: Date,

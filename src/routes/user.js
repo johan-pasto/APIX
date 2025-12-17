@@ -57,8 +57,8 @@ router.get('/:userId/tweets', async (req, res) => {
     
     // Obtener tweets del usuario
     const tweets = await Tweet.find({ usuario: userId })
-      .populate('usuario', 'nombre username avatar')
-      .populate('comentarios.usuario', 'nombre username avatar')
+      .populate('usuario', 'nombre usuario avatar')
+      .populate('comentarios.usuario', 'nombre usuario avatar')
       .sort({ fecha: -1 });
     
     res.json({
@@ -99,6 +99,7 @@ router.put('/:userId', authMiddleware, async (req, res) => {
     const { 
       nombre, 
       telefono, 
+      avatar, 
       avatar_url, 
       bio, 
       ubicacion, 
@@ -108,7 +109,9 @@ router.put('/:userId', authMiddleware, async (req, res) => {
     const updateData = {};
     if (nombre !== undefined) updateData.nombre = nombre;
     if (telefono !== undefined) updateData.telefono = telefono;
-    if (avatar_url !== undefined) updateData.avatar_url = avatar_url;
+    // aceptar tanto `avatar` como `avatar_url` desde el cliente
+    if (avatar !== undefined) updateData.avatar = avatar;
+    else if (avatar_url !== undefined) updateData.avatar = avatar_url;
     if (bio !== undefined) updateData.bio = bio;
     if (ubicacion !== undefined) updateData.ubicacion = ubicacion;
     if (sitio_web !== undefined) updateData.sitio_web = sitio_web;
@@ -143,7 +146,7 @@ router.get('/:userId/seguidores', async (req, res) => {
     const { userId } = req.params;
     
     const user = await User.findById(userId)
-      .populate('seguidores', 'nombre username avatar')
+      .populate('seguidores', 'nombre usuario avatar')
       .select('seguidores');
     
     if (!user) {
@@ -177,7 +180,7 @@ router.get('/:userId/siguiendo', async (req, res) => {
     const { userId } = req.params;
     
     const user = await User.findById(userId)
-      .populate('siguiendo', 'nombre username avatar')
+      .populate('siguiendo', 'nombre usuario avatar')
       .select('siguiendo');
     
     if (!user) {
