@@ -7,6 +7,7 @@ const connectDB = require('./utils/database');
 // Importar rutas
 const authRoutes = require('./routes/auth.routes');
 const tweetRoutes = require('./routes/tweet');
+const userRoutes = require('./routes/user'); // <-- NUEVA IMPORTACIÓN
 
 // Conectar a la base de datos
 connectDB();
@@ -42,8 +43,13 @@ app.get('/', (req, res) => {
         registro: 'POST /api/registro',
         perfil: 'GET /api/perfil (requiere token)'
       },
+      users: {  // <-- NUEVA SECCIÓN
+        obtener_usuario: 'GET /api/users/:userId',
+        obtener_tweets_usuario: 'GET /api/users/:userId/tweets',
+        actualizar_perfil: 'PUT /api/users/:userId (requiere token)'
+      },
       tweets: {
-        obtener_todos: 'GET /api/tweets (requiere token)',
+        obtener_todos: 'GET /api/tweets',
         crear: 'POST /api/tweets (requiere token)',
         like: 'POST /api/tweets/:id/like (requiere token)',
         eliminar: 'DELETE /api/tweets/:id (requiere token)'
@@ -56,7 +62,6 @@ app.get('/', (req, res) => {
 app.get('/api/test-db', async (req, res) => {
   const mongoose = require('mongoose');
   try {
-    // Intenta una operación simple de MongoDB
     const User = require('./models/User');
     const count = await User.countDocuments();
     res.json({ ok: true, message: '✅ DB Conectada', userCount: count });
@@ -74,6 +79,7 @@ app.get('/api/test-db', async (req, res) => {
 // Rutas de la API
 app.use('/api', authRoutes);
 app.use('/api/tweets', tweetRoutes);
+app.use('/api/users', userRoutes); // <-- NUEVA RUTA
 
 // Middleware para manejar errores 404
 app.use('*', (req, res) => {
