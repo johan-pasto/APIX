@@ -4,7 +4,7 @@ const router = express.Router();
 const User = require('../models/User');
 const Tweet = require('../models/Tweet');
 const authMiddleware = require('../middleware/auth.middleware');
-
+console.log('✅ Rutas de usuario cargadas');
 /**
  * @route   GET /api/users/:userId
  * @desc    Obtener información de un usuario por ID
@@ -82,6 +82,10 @@ router.get('/:userId/tweets', async (req, res) => {
  */
 
 router.put('/:userId', authMiddleware, async (req, res) => {
+    console.log('🔔 PUT /api/users/:userId EJECUTÁNDOSE');
+    console.log('📌 Params:', req.params);
+    console.log('📌 User del token:', req.user);
+    console.log('📌 Body completo:', req.body);
   try {
     const { userId } = req.params;
     
